@@ -200,10 +200,7 @@ const getAllProperties = function (options, limit = 10) {
   ORDER BY cost_per_night
   LIMIT $${queryParams.length};
   `;
-
   // 5
-  console.log("queryString:", queryString, "queryParams:", queryParams);
-
   // 6
   return pool
   .query(queryString, queryParams)
@@ -218,10 +215,28 @@ exports.getAllProperties = getAllProperties;
  * @param {{}} property An object containing all of the property details.
  * @return {Promise<{}>} A promise to the property.
  */
-const addProperty = function(property) {
-  const propertyId = Object.keys(properties).length + 1;
-  property.id = propertyId;
-  properties[propertyId] = property;
-  return Promise.resolve(property);
+// const addProperty = function(property) {
+//   const propertyId = Object.keys(properties).length + 1;
+//   property.id = propertyId;
+//   properties[propertyId] = property;
+//   return Promise.resolve(property);
+// }
+
+const addProperty = (property) => {
+//object destructuring used to order key:value pairs properly because originally it was unknown which order they came in and made it impossible to work with
+const {title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, street, city, province, post_code, country, parking_spaces, number_of_bathrooms, number_of_bedrooms, owner_id} = property
+
+const queryParams = [title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, street, city, province, post_code, country, parking_spaces, number_of_bathrooms, number_of_bedrooms, owner_id]
+
+  let queryString = `INSERT INTO properties (title, description, thumbnail_photo_url, cover_photo_url, cost_per_night, street, city, province, post_code, country, parking_spaces, number_of_bathrooms, number_of_bedrooms, owner_id) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *;`
+  // console.log("queryString:", queryString, "queryParams:", queryParams);
+  return pool 
+    .query(queryString, queryParams)
+    .then((result) => {
+      return result.rows[0];
+    })
+    .catch((err) => console.log(err.message))
 }
+
+
 exports.addProperty = addProperty;
